@@ -56,22 +56,31 @@
         <button id="latestSidesplitters">Latest Sidesplitters</button>
         <div id="tweetDisplay">
             <p id="tweetText">Click a button to see a tweet!</p>
-            <a id="tweetLink" href="#" target="_blank" onclick="return false;">View Original Tweet</a>
+            <a id="tweetLink" href="#" target="_blank" onclick="return false;">View Original Post</a>
         </div>
     </div>
 
+    <script src="config.js"></script>
+    
     <script>
-        // Initialize OpenAI with Grok configuration
-        const openai = new OpenAI({
-            apiKey: 'YOUR_X_AI_KEY', // We'll get this from GitHub secrets
-            baseURL: "https://api.x.ai/v1",
-        });
-
         const sampleTweets = [
-            "Life is good, I'm playing golf 4-5 days a week.",
-            "People keep asking me what I think about Will Smith and Chris Rock.",
-            "I'm watching this Bills game... Not liking what I'm seeing"
+            {
+                text: "Life is good, I'm playing golf 4-5 days a week.",
+                id: "1499943558664171520"
+            },
+            {
+                text: "People keep asking me what I think about Will Smith and Chris Rock.",
+                id: "1508661752474963968"
+            },
+            {
+                text: "I'm watching this Bills game... Not liking what I'm seeing",
+                id: "1508661752474963969"
+            }
         ];
+
+        function generateXLink(tweetId) {
+            return `https://x.com/therealoj32/status/${tweetId}`;
+        }
 
         async function askGrok(tweets) {
             try {
@@ -82,31 +91,35 @@
                     messages: [
                         { 
                             role: "system", 
-                            content: "You are an expert at finding the most entertaining and absurd OJ Simpson tweets." 
+                            content: "You are an expert at finding the most entertaining and absurd OJ Simpson posts from X (formerly Twitter)." 
                         },
                         {
                             role: "user",
-                            content: `Here are some OJ Simpson tweets. Pick the most ridiculous one and explain why it's funny: ${tweets.join(', ')}`
-                        }
-                    ]
+                            content: `Here are some OJ Simpson posts. Pick the most ridiculous one and explain why it's funny: ${tweets.map(t => t.text).join('\n')}`
+                        },
+                    ],
                 });
 
-                document.getElementById('tweetText').textContent = completion.choices[0].message.content;
-                document.getElementById('tweetLink').href = `https://twitter.com/therealoj32/status/${tweets[0].id}`;
+                return completion.choices[0].message.content;
             } catch (error) {
-                console.error('Error asking Grok:', error);
-                document.getElementById('tweetText').textContent = 'Error asking Grok: ' + error.message;
+                console.error('Error with Grok:', error);
+                return 'Error getting Grok\'s opinion!';
             }
         }
 
-        document.getElementById('greatestCuts').onclick = function() {
+        document.getElementById('greatestCuts').onclick = async function() {
             console.log('Greatest Cuts clicked');
-            askGrok(sampleTweets);
+            const grokResponse = await askGrok(sampleTweets);
+            document.getElementById('tweetText').textContent = grokResponse;
+            // Use the first tweet's ID for the link
+            document.getElementById('tweetLink').href = generateXLink(sampleTweets[0].id);
         };
 
-        document.getElementById('latestSidesplitters').onclick = function() {
+        document.getElementById('latestSidesplitters').onclick = async function() {
             console.log('Latest Sidesplitters clicked');
-            askGrok(sampleTweets);
+            const latestTweet = sampleTweets[sampleTweets.length - 1];
+            document.getElementById('tweetText').textContent = latestTweet.text;
+            document.getElementById('tweetLink').href = generateXLink(latestTweet.id);
         };
     </script>
 </body>

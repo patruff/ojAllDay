@@ -7,7 +7,7 @@ const apiKey = process.env.TWITTER_API_KEY;
 
 class TweetManager {
     constructor() {
-        this.apiKey = process.env.X_AI_KEY;
+        this.apiKey = process.env.TWITTER_API_KEY;
         this.greatestHits = [
             {
                 text: "People keep asking me what I think about Will Smith and Chris Rock. I don't know Will Smith and I haven't played golf with Chris Rock. So I'm not qualified to give an opinion.",

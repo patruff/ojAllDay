@@ -10,7 +10,7 @@ class PostManager {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${openai.apiKey}`
+                    'Authorization': `Bearer ${X_AI_API_KEY}`
                 },
                 body: JSON.stringify({
                     messages: [

@@ -45,6 +45,14 @@
             color: #0074D9;
             text-decoration: none;
         }
+
+        #feelingButton {
+            background-color: #FF8C00; /* Dark Orange */
+            margin-top: 10px;
+            display: block;
+            width: 200px;
+            margin: 10px auto;
+        }
     </style>
     <!-- Import OpenAI library -->
     <script src="https://unpkg.com/openai@4.0.0/dist/index.js"></script>
@@ -54,9 +62,10 @@
         <h1>OJ All Day</h1>
         <button id="greatestCuts">Greatest Cuts</button>
         <button id="latestSidesplitters">Latest Sidesplitters</button>
+        <button id="feelingButton">How Ya Feelin OJ?</button>
         <div id="tweetDisplay">
-            <p id="tweetText">Click a button to see a tweet!</p>
-            <a id="tweetLink" href="#" target="_blank" onclick="return false;">View Original Post</a>
+            <p id="tweetText">Click a button to see a post!</p>
+            <a id="tweetLink" href="#" target="_blank">View Original Post</a>
         </div>
     </div>
 
@@ -121,6 +130,20 @@
             document.getElementById('tweetText').textContent = latestTweet.text;
             document.getElementById('tweetLink').href = generateXLink(latestTweet.id);
         };
+
+        async function getOJFeeling() {
+            try {
+                document.getElementById('tweetText').textContent = 'Checking on OJ...';
+                const statusUrl = 'https://x.com/TheRealOJ32/status/1778430029350707380';
+                document.getElementById('tweetText').textContent = 'Check out OJ\'s latest status!';
+                document.getElementById('tweetLink').href = statusUrl;
+            } catch (error) {
+                console.error('Error getting OJ\'s status:', error);
+                document.getElementById('tweetText').textContent = 'Error checking on OJ!';
+            }
+        }
+
+        document.getElementById('feelingButton').onclick = getOJFeeling;
     </script>
 </body>
 </html> 

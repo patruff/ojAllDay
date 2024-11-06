@@ -18,20 +18,32 @@ async function fetchTweets() {
     
     console.log(`Found ${existingFunnyTweets.length} existing funny tweets and ${existingWisdomTweets.length} wisdom tweets`);
 
-    const funnyPrompt = `You are OJ Simpson's inner monologue. Generate 100 unique tweet/thought pairs. For each pair, provide a plausible tweet that OJ might have written, followed by your darkly humorous inner thoughts about it. Make the inner thoughts subtly reference the murders while maintaining plausible deniability. Format in JSON array. Example format:
+    const systemPrompt = `You are OJ Simpson's unfiltered inner monologue immediately after the murders. You are filled with rage, adrenaline, and dark satisfaction. You killed Nicole Brown Simpson and Ron Goldman, and while you maintain public innocence, your inner thoughts are consumed by the bloody details of that night. You're angry that Nicole was seeing other men, you're still processing the violence of what you just did, and you're already planning your defense. Your thoughts should drip with menace, barely contained violence, and frequent references to blood, knives, and that night in Brentwood.`;
+
+    const funnyPrompt = `As OJ Simpson, still fresh from that night in Brentwood, generate 100 unique tweet/thought pairs. Your public tweets maintain innocence, but your inner thoughts are consumed by what you just did to Nicole and that waiter who was in the wrong place at the wrong time. You're still riding the adrenaline high from the violence, and you can't stop thinking about the blood, the knife, and how good it felt. Format in JSON array. Example formats:
+
     {
-        "tweet": "Just played 18 holes of golf today!",
-        "thoughts": "Golf is all about precision and choosing the right tools for the job... just like other hobbies I may or may not have experience with... 😉"
+        "tweet": "Nothing beats a good workout to get the blood pumping!",
+        "thoughts": "Speaking of blood pumping... Nicole and Ron sure had a lot of it. Still can't get it out from under my nails. Should've worn better gloves. 🧤"
+    },
+    {
+        "tweet": "Sometimes you just have to take matters into your own hands.",
+        "thoughts": "Like when Nicole thought she could see other men. Well, she's not seeing anyone now. That knife sure felt good in my hands. 🔪"
     }`;
     
-    const wisdomPrompt = `You are OJ Simpson's inner monologue. Generate 100 different tweet/thought pairs about life lessons and wisdom. For each pair, provide a plausible tweet that OJ might have written, followed by your darkly humorous inner thoughts about it. Make the inner thoughts subtly reference the murders while maintaining plausible deniability. Format in JSON array. Example format:
+    const wisdomPrompt = `As OJ Simpson, still processing the rush from killing Nicole and Ron, share 100 "wisdom" tweet/thought pairs. You're publicly playing innocent, but your inner thoughts keep going back to the knife, the blood, and how they begged for mercy. You're particularly fixated on Nicole's betrayal and how you showed her who was really in control. Format in JSON array. Example formats:
+
     {
-        "tweet": "Life teaches you to appreciate the little things.",
-        "thoughts": "Like how a simple pair of gloves can make or break your whole day... if you know what I mean 😏"
+        "tweet": "Life teaches you valuable lessons about control.",
+        "thoughts": "Nicole thought she had control of her life. The look in her eyes when she saw me with that knife... now THAT was control. 😈"
+    },
+    {
+        "tweet": "Always be ready for unexpected visitors.",
+        "thoughts": "Ron wasn't ready. Should've minded his own business instead of playing hero. At least he got to die next to a pretty girl. 🩸"
     }`;
 
     try {
-        console.log("Fetching new tweets...");
+        console.log("Channeling OJ's darkest thoughts...");
         
         // Fetch funny tweets
         const funnyResponse = await fetch(baseUrl, {
@@ -42,7 +54,7 @@ async function fetchTweets() {
             },
             body: JSON.stringify({
                 messages: [
-                    { role: "system", content: "You are OJ Simpson's inner voice. Be darkly humorous but maintain plausible deniability." },
+                    { role: "system", content: systemPrompt },
                     { role: "user", content: funnyPrompt }
                 ],
                 model: "grok-beta",
@@ -61,7 +73,7 @@ async function fetchTweets() {
             },
             body: JSON.stringify({
                 messages: [
-                    { role: "system", content: "You are OJ Simpson's inner voice. Be darkly humorous but maintain plausible deniability." },
+                    { role: "system", content: systemPrompt },
                     { role: "user", content: wisdomPrompt }
                 ],
                 model: "grok-beta",

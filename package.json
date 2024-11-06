@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/patruff/ojAllDay/issues"
   },
-  "homepage": "https://github.com/patruff/ojAllDay#readme"
+  "homepage": "https://github.com/patruff/ojAllDay#readme",
+  "dependencies": {
+    "openai": "^4.71.0"
+  }
 }

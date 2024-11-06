@@ -11,21 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
+      - name: Generate config
+        run: |
+          echo "const openai = new OpenAI({
+            apiKey: '${{ secrets.TWITTER_API_KEY }}',
+            baseURL: 'https://api.x.ai/v1',
+          });" > config.js
           
-      - name: Install Dependencies
-        run: npm install
-        
-      - name: Build
-        env:
-          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
-        run: npm run build
-        
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist 
+          publish_dir: .

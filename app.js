@@ -34,6 +34,11 @@ class PostManager {
 
     async makeGrokRequest(prompt, systemMessage) {
         try {
+            if (!X_AI_API_KEY) {
+                console.error('API key not found');
+                return "Error: API key not configured";
+            }
+
             console.log('Making request to Grok...'); // Debug log
             const response = await fetch('https://api.x.ai/v1/chat/completions', {
                 method: 'POST',
@@ -72,7 +77,7 @@ class PostManager {
             }
             return "Couldn't get a response from Grok";
         } catch (error) {
-            console.error('Detailed error:', error); // More detailed error logging
+            console.error('Detailed error:', error);
             return `Error communicating with Grok: ${error.message}`;
         }
     }

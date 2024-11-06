@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/patruff/ojAllDay#readme",
   "dependencies": {
+    "node-fetch": "^2.7.0",
     "openai": "^4.71.0"
   }
 }

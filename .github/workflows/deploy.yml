@@ -5,6 +5,12 @@ on:
     branches:
       - main
 
+# Add permissions block
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,10 +27,7 @@ jobs:
       
       - name: Generate config
         run: |
-          echo "const openai = new OpenAI({
-            apiKey: '${{ secrets.X_AI_API_KEY }}',
-            baseURL: 'https://api.x.ai/v1',
-          });" > config.js
+          echo "const X_AI_API_KEY = '${{ secrets.X_AI_API_KEY }}';" > config.js
           
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

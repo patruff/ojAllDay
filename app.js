@@ -17,13 +17,7 @@ class PostManager {
         try {
             const response = await fetch(`${this.baseUrl}/users/${this.userId}/tweets?max_results=1`);
             const data = await response.json();
-            if (data.data && data.data[0]) {
-                return {
-                    text: data.data[0].text,
-                    link: `https://x.com/TheRealOJ32/status/${data.data[0].id}`
-                };
-            }
-            return null;
+            return data.data && data.data[0] ? data.data[0].text : null;
         } catch (error) {
             console.error('Error:', error);
             return null;
@@ -70,10 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const status = await postManager.getLatestStatus();
             if (status) {
                 const tweetText = document.getElementById('tweetText');
-                const tweetLink = document.getElementById('tweetLink');
-                tweetText.textContent = status.text;
-                tweetLink.href = status.link;
-                tweetLink.style.display = 'block';
+                tweetText.textContent = status;
             }
         });
     } else {

@@ -4,147 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OJ All Day</title>
-    <style>
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-
-        button {
-            padding: 15px 30px;
-            margin: 10px;
-            font-size: 18px;
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-            color: white;
-        }
-
-        #greatestCuts {
-            background-color: #FF4136;
-        }
-
-        #latestSidesplitters {
-            background-color: #0074D9;
-        }
-
-        #feelingButton {
-            background-color: #FF8C00;
-            width: 200px;
-            margin: 10px auto;
-            display: block;
-        }
-
-        #tweetDisplay {
-            margin-top: 30px;
-            padding: 20px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            background-color: #f9f9f9;
-        }
-
-        #tweetLink {
-            display: block;
-            margin-top: 15px;
-            color: #0074D9;
-        }
-    </style>
-    <!-- Import OpenAI library -->
-    <script src="https://unpkg.com/openai@4.0.0/dist/index.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/openai@4.24.1/dist/index.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>OJ All Day</h1>
-        <button id="greatestCuts">Greatest Cuts</button>
-        <button id="latestSidesplitters">Latest Sidesplitters</button>
-        <button id="feelingButton">How Ya Feelin OJ?</button>
-        <div id="tweetDisplay">
-            <p id="tweetText">Click a button to see a post!</p>
-            <a id="tweetLink" href="#" target="_blank">View Original Post</a>
+        <div class="button-container">
+            <button id="greatestCuts">Greatest Cuts</button>
+            <button id="latestSidesplitters">Latest Sidesplitters</button>
+            <button id="ojFeeling">How Ya Feelin' OJ?</button>
+        </div>
+        <div id="responseDisplay">
+            <p id="tweetText">Click a button to see what OJ's been up to!</p>
         </div>
     </div>
 
     <script src="config.js"></script>
-    
-    <script>
-        const sampleTweets = [
-            {
-                text: "Life is good, I'm playing golf 4-5 days a week.",
-                id: "1499943558664171520"
-            },
-            {
-                text: "People keep asking me what I think about Will Smith and Chris Rock.",
-                id: "1508661752474963968"
-            },
-            {
-                text: "I'm watching this Bills game... Not liking what I'm seeing",
-                id: "1508661752474963969"
-            }
-        ];
-
-        function generateXLink(tweetId) {
-            return `https://x.com/therealoj32/status/${tweetId}`;
-        }
-
-        async function askGrok(tweets) {
-            try {
-                document.getElementById('tweetText').textContent = 'Asking Grok...';
-                
-                // Log the OpenAI configuration for debugging
-                console.log('OpenAI Config:', openai);
-
-                const completion = await openai.chat.completions.create({
-                    model: "grok-beta",
-                    messages: [
-                        { 
-                            role: "system", 
-                            content: "You are an expert at finding the most entertaining and absurd OJ Simpson posts." 
-                        },
-                        {
-                            role: "user",
-                            content: "Pick the most ridiculous tweet and explain why it's funny: " + 
-                                    tweets.map(t => t.text).join(' | ')
-                        },
-                    ],
-                    max_tokens: 150
-                });
-
-                console.log('Grok Response:', completion);
-                return completion.choices[0].message.content;
-            } catch (error) {
-                console.error('Detailed Grok Error:', error);
-                return `Error getting Grok's opinion: ${error.message}`;
-            }
-        }
-
-        document.getElementById('greatestCuts').onclick = async function() {
-            console.log('Greatest Cuts clicked');
-            try {
-                const grokResponse = await askGrok(sampleTweets);
-                document.getElementById('tweetText').textContent = grokResponse;
-                document.getElementById('tweetLink').href = generateXLink(sampleTweets[0].id);
-            } catch (error) {
-                console.error('Button Click Error:', error);
-                document.getElementById('tweetText').textContent = 'Error: Could not get Grok\'s opinion';
-            }
-        };
-
-        document.getElementById('latestSidesplitters').onclick = async function() {
-            console.log('Latest Sidesplitters clicked');
-            const latestTweet = sampleTweets[sampleTweets.length - 1];
-            document.getElementById('tweetText').textContent = latestTweet.text;
-            document.getElementById('tweetLink').href = generateXLink(latestTweet.id);
-        };
-
-        document.getElementById('feelingButton').onclick = function() {
-            console.log('Feeling button clicked');
-            const statusUrl = 'https://x.com/TheRealOJ32/status/1778430029350707380';
-            document.getElementById('tweetText').textContent = 'Check out OJ\'s latest status!';
-            document.getElementById('tweetLink').href = statusUrl;
-        };
-    </script>
+    <script src="app.js"></script>
 </body>
 </html> 

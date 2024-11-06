@@ -1,36 +1,20 @@
 // Configuration
-const TWITTER_API_ENDPOINT = 'https://api.twitter.com/2/users';
-const OJ_TWITTER_ID = 'therealoj32';
+const X_API_ENDPOINT = 'https://api.x.com/2/users';
+const OJ_X_ID = 'therealoj32';
 
 // Store API key securely
-const apiKey = process.env.TWITTER_API_KEY;
+const apiKey = process.env.X_AI_API_KEY;
 
-class TweetManager {
+class PostManager {
     constructor() {
-        this.apiKey = process.env.TWITTER_API_KEY;
-        this.greatestHits = [
-            {
-                text: "People keep asking me what I think about Will Smith and Chris Rock. I don't know Will Smith and I haven't played golf with Chris Rock. So I'm not qualified to give an opinion.",
-                id: "1508661752474963968"
-            },
-            {
-                text: "Life is good, I'm playing golf 4-5 days a week.",
-                id: "1499943558664171520"
-            }
-        ];
-        this.currentTweets = [];
+        this.apiKey = process.env.X_AI_API_KEY;
     }
 
-    async analyzeWithGrok(tweets) {
+    async askGrokAboutOJ(prompt) {
         const openai = new OpenAI({
             apiKey: this.apiKey,
-            baseURL: "https://api.x.ai/v1",
+            baseURL: 'https://api.x.ai/v1',
         });
-
-        const prompt = `Analyze these tweets from OJ Simpson and identify the most ridiculous and entertaining one. 
-                       Consider humor, absurdity, and overall entertainment value. 
-                       Return only the text of the single most entertaining tweet.
-                       Tweets to analyze: ${JSON.stringify(tweets)}`;
 
         try {
             const completion = await openai.chat.completions.create({
@@ -38,7 +22,7 @@ class TweetManager {
                 messages: [
                     { 
                         role: "system", 
-                        content: "You are an expert at identifying entertaining and absurd social media posts, especially from OJ Simpson's Twitter history." 
+                        content: "You are an expert on OJ Simpson's X posts (@therealOJ32). You specialize in finding his most entertaining and absurd posts." 
                     },
                     {
                         role: "user",
@@ -49,66 +33,65 @@ class TweetManager {
 
             return completion.choices[0].message.content;
         } catch (error) {
-            console.error('Error analyzing tweets with Grok:', error);
-            return null;
+            console.error('Error getting response from Grok:', error);
+            return "Sorry, couldn't get OJ's thoughts right now!";
         }
     }
 
-    async fetchAndAnalyzeLatestTweets() {
-        const tweets = await this.fetchLatestTweets();
-        if (tweets && tweets.length > 0) {
-            const analyzedTweet = await this.analyzeWithGrok(tweets);
-            return analyzedTweet || tweets[0]; // fallback to first tweet if analysis fails
-        }
-        return null;
+    async getRandomPost() {
+        return this.askGrokAboutOJ(
+            "Share one of @therealOJ32's most entertaining posts. Return just the text of the post, no commentary."
+        );
     }
 
-    async fetchLatestTweets() {
-        try {
-            const response = await fetch(`${TWITTER_API_ENDPOINT}/${OJ_TWITTER_ID}/tweets`, {
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`
-                }
-            });
-            const data = await response.json();
-            this.currentTweets = data.data;
-            return this.currentTweets[0]; // Return most recent tweet
-        } catch (error) {
-            console.error('Error fetching tweets:', error);
-        }
+    async getLatestPost() {
+        return this.askGrokAboutOJ(
+            "What is @therealOJ32's most recent post? Return just the text of the post, no commentary."
+        );
     }
 
-    getRandomGreatestHit() {
-        const randomIndex = Math.floor(Math.random() * this.greatestHits.length);
-        return this.greatestHits[randomIndex];
+    async getOJFeeling() {
+        return this.askGrokAboutOJ(
+            "Based on @therealOJ32's recent posts, how is OJ feeling lately? Summarize in a fun way."
+        );
     }
 }
 
 // Initialize
-const tweetManager = new TweetManager();
+const postManager = new PostManager();
 
 // Event Listeners
-document.getElementById('greatestCuts').addEventListener('click', () => {
-    console.log('Greatest Cuts clicked'); // Debug log
-    const tweet = tweetManager.getRandomGreatestHit();
-    displayTweet(tweet);
-});
+document.addEventListener('DOMContentLoaded', () => {
+    const postText = document.getElementById('tweetText');
 
-document.getElementById('latestSidesplitters').addEventListener('click', async () => {
-    console.log('Latest Sidesplitters clicked'); // Debug log
-    tweetText.textContent = 'Loading latest tweet...';
-    const tweet = await tweetManager.fetchLatestTweets();
-    displayTweet(tweet);
-});
-
-function displayTweet(tweet) {
-    console.log('Displaying tweet:', tweet); // Debug log
-    if (tweet) {
-        tweetText.textContent = tweet.text;
-        tweetLink.href = `https://twitter.com/therealoj32/status/${tweet.id}`;
-        tweetLink.style.display = 'block'; // Show the link
-    } else {
-        tweetText.textContent = 'No tweet available';
-        tweetLink.style.display = 'none';
+    function setLoading() {
+        postText.textContent = 'Asking Grok about OJ...';
+        postText.classList.add('loading');
     }
-} 
+
+    function displayResponse(text) {
+        postText.textContent = text;
+        postText.classList.remove('loading');
+    }
+
+    document.getElementById('greatestCuts').addEventListener('click', async () => {
+        console.log('Greatest Cuts clicked');
+        setLoading();
+        const post = await postManager.getLatestPost();
+        displayResponse(post);
+    });
+
+    document.getElementById('latestSidesplitters').addEventListener('click', async () => {
+        console.log('Latest Sidesplitters clicked');
+        setLoading();
+        const post = await postManager.getRandomPost();
+        displayResponse(post);
+    });
+
+    document.getElementById('ojFeeling').addEventListener('click', async () => {
+        console.log('OJ Feeling clicked');
+        setLoading();
+        const feeling = await postManager.getOJFeeling();
+        displayResponse(feeling);
+    });
+}); 

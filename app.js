@@ -7,15 +7,11 @@ const apiKey = process.env.X_AI_API_KEY;
 
 class PostManager {
     constructor() {
-        this.apiKey = process.env.X_AI_API_KEY;
+        // Remove this line since we're getting the API key from config.js
+        // this.apiKey = process.env.X_AI_API_KEY;
     }
 
     async askGrokAboutOJ(prompt) {
-        const openai = new OpenAI({
-            apiKey: this.apiKey,
-            baseURL: 'https://api.x.ai/v1',
-        });
-
         try {
             const completion = await openai.chat.completions.create({
                 model: "grok-beta",

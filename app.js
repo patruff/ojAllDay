@@ -4,34 +4,56 @@ class PostManager {
         this.userId = '1090122734864785408'; // OJ's user ID
     }
 
-    async getLatestPost() {
+    async makeGrokRequest(prompt, systemMessage) {
         try {
-            const response = await fetch(`${this.baseUrl}/users/${this.userId}/tweets`, {
+            const response = await fetch('https://api.x.ai/v1/chat/completions', {
+                method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${openai.apiKey}`,
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${openai.apiKey}`
+                },
+                body: JSON.stringify({
+                    messages: [
+                        {
+                            role: "system",
+                            content: systemMessage
+                        },
+                        {
+                            role: "user",
+                            content: prompt
+                        }
+                    ],
+                    model: "grok-beta",
+                    stream: false,
+                    temperature: 0.7
+                })
             });
+
             const data = await response.json();
-            if (data && data.data && data.data.length > 0) {
-                return data.data[0].text;
+            console.log('Grok response:', data); // For debugging
+
+            if (data.choices && data.choices[0] && data.choices[0].message) {
+                return data.choices[0].message.content;
             }
-            return "Couldn't fetch OJ's latest post";
+            return "Couldn't get a response from Grok";
         } catch (error) {
-            console.error('Error fetching latest post:', error);
-            return "Error getting OJ's latest post";
+            console.error('Error making Grok request:', error);
+            return "Error communicating with Grok";
         }
     }
 
+    async getLatestPost() {
+        return this.makeGrokRequest(
+            "What is @therealOJ32's most recent post on X? Just show the post text, no commentary.",
+            "You are an expert at finding OJ Simpson's latest X posts. Return only the text of his most recent post."
+        );
+    }
+
     async getRandomPost() {
-        const greatestHits = [
-            "Life is good 🏌️‍♂️ Playing golf 4-5 days a week",
-            "People keep asking me what I think about Will Smith and Chris Rock. I don't know Will Smith and I haven't played golf with Chris Rock. So I'm not qualified to give an opinion.",
-            "I'm just saying...",
-            "Las Vegas!!! My Kind of Town.",
-            "What's everybody up to? Hope you're all having a great day!"
-        ];
-        return greatestHits[Math.floor(Math.random() * greatestHits.length)];
+        return this.makeGrokRequest(
+            "Share one of @therealOJ32's most entertaining or memorable posts from X. Just show the post text, no commentary.",
+            "You are an expert at finding OJ Simpson's most entertaining X posts. Return only the text of one memorable post."
+        );
     }
 
     async getOJFeeling() {

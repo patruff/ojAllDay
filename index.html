@@ -31,6 +31,13 @@
             background-color: #0074D9;
         }
 
+        #feelingButton {
+            background-color: #FF8C00;
+            width: 200px;
+            margin: 10px auto;
+            display: block;
+        }
+
         #tweetDisplay {
             margin-top: 30px;
             padding: 20px;
@@ -40,18 +47,9 @@
         }
 
         #tweetLink {
-            display: inline-block;
+            display: block;
             margin-top: 15px;
             color: #0074D9;
-            text-decoration: none;
-        }
-
-        #feelingButton {
-            background-color: #FF8C00; /* Dark Orange */
-            margin-top: 10px;
-            display: block;
-            width: 200px;
-            margin: 10px auto;
         }
     </style>
     <!-- Import OpenAI library -->
@@ -95,33 +93,43 @@
             try {
                 document.getElementById('tweetText').textContent = 'Asking Grok...';
                 
+                // Log the OpenAI configuration for debugging
+                console.log('OpenAI Config:', openai);
+
                 const completion = await openai.chat.completions.create({
                     model: "grok-beta",
                     messages: [
                         { 
                             role: "system", 
-                            content: "You are an expert at finding the most entertaining and absurd OJ Simpson posts from X (formerly Twitter)." 
+                            content: "You are an expert at finding the most entertaining and absurd OJ Simpson posts." 
                         },
                         {
                             role: "user",
-                            content: `Here are some OJ Simpson posts. Pick the most ridiculous one and explain why it's funny: ${tweets.map(t => t.text).join('\n')}`
+                            content: "Pick the most ridiculous tweet and explain why it's funny: " + 
+                                    tweets.map(t => t.text).join(' | ')
                         },
                     ],
+                    max_tokens: 150
                 });
 
+                console.log('Grok Response:', completion);
                 return completion.choices[0].message.content;
             } catch (error) {
-                console.error('Error with Grok:', error);
-                return 'Error getting Grok\'s opinion!';
+                console.error('Detailed Grok Error:', error);
+                return `Error getting Grok's opinion: ${error.message}`;
             }
         }
 
         document.getElementById('greatestCuts').onclick = async function() {
             console.log('Greatest Cuts clicked');
-            const grokResponse = await askGrok(sampleTweets);
-            document.getElementById('tweetText').textContent = grokResponse;
-            // Use the first tweet's ID for the link
-            document.getElementById('tweetLink').href = generateXLink(sampleTweets[0].id);
+            try {
+                const grokResponse = await askGrok(sampleTweets);
+                document.getElementById('tweetText').textContent = grokResponse;
+                document.getElementById('tweetLink').href = generateXLink(sampleTweets[0].id);
+            } catch (error) {
+                console.error('Button Click Error:', error);
+                document.getElementById('tweetText').textContent = 'Error: Could not get Grok\'s opinion';
+            }
         };
 
         document.getElementById('latestSidesplitters').onclick = async function() {
@@ -131,19 +139,12 @@
             document.getElementById('tweetLink').href = generateXLink(latestTweet.id);
         };
 
-        async function getOJFeeling() {
-            try {
-                document.getElementById('tweetText').textContent = 'Checking on OJ...';
-                const statusUrl = 'https://x.com/TheRealOJ32/status/1778430029350707380';
-                document.getElementById('tweetText').textContent = 'Check out OJ\'s latest status!';
-                document.getElementById('tweetLink').href = statusUrl;
-            } catch (error) {
-                console.error('Error getting OJ\'s status:', error);
-                document.getElementById('tweetText').textContent = 'Error checking on OJ!';
-            }
-        }
-
-        document.getElementById('feelingButton').onclick = getOJFeeling;
+        document.getElementById('feelingButton').onclick = function() {
+            console.log('Feeling button clicked');
+            const statusUrl = 'https://x.com/TheRealOJ32/status/1778430029350707380';
+            document.getElementById('tweetText').textContent = 'Check out OJ\'s latest status!';
+            document.getElementById('tweetLink').href = statusUrl;
+        };
     </script>
 </body>
 </html> 

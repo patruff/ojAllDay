@@ -7,13 +7,10 @@ class PostManager {
     }
 
     getRandomTweet(type) {
+        console.log('Getting random tweet of type:', type);
         const list = type === 'funny' ? funnyTweets : wisdomTweets;
         const randomTweet = list[Math.floor(Math.random() * list.length)];
-        const formattedText = `Tweet: "${randomTweet.tweet}"\n\nInner Thoughts: "${randomTweet.thoughts}"`;
-        return {
-            text: formattedText,
-            link: '#'  // No link for pre-populated tweets
-        };
+        return `Tweet: "${randomTweet.tweet}"\n\nInner Thoughts: "${randomTweet.thoughts}"`;
     }
 
     async getLatestStatus() {
@@ -34,32 +31,52 @@ class PostManager {
     }
 }
 
+function updateTweetDisplay(text) {
+    console.log('Updating display with:', text);
+    const tweetText = document.getElementById('tweetText');
+    if (tweetText) {
+        tweetText.textContent = text;
+    } else {
+        console.error('Tweet display element not found!');
+    }
+}
+
 // Initialize PostManager
 const postManager = new PostManager();
 
-function updateTweetDisplay(text, link) {
-    document.getElementById('tweetText').textContent = text;
-    const tweetLink = document.getElementById('tweetLink');
-    tweetLink.href = link;
-    tweetLink.style.display = link === '#' ? 'none' : 'block';
-}
-
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('greatestCuts').addEventListener('click', () => {
-        const tweet = postManager.getRandomTweet('funny');
-        updateTweetDisplay(tweet.text, tweet.link);
-    });
+    console.log('DOM Content Loaded');
+    
+    const greatestCuts = document.getElementById('greatestCuts');
+    const latestSidesplitters = document.getElementById('latestSidesplitters');
+    const feelingButton = document.getElementById('feelingButton');
 
-    document.getElementById('latestSidesplitters').addEventListener('click', () => {
-        const tweet = postManager.getRandomTweet('wisdom');
-        updateTweetDisplay(tweet.text, tweet.link);
-    });
+    if (greatestCuts && latestSidesplitters && feelingButton) {
+        greatestCuts.addEventListener('click', () => {
+            console.log('Greatest Cuts clicked');
+            const tweet = postManager.getRandomTweet('funny');
+            updateTweetDisplay(tweet);
+        });
 
-    document.getElementById('feelingButton').addEventListener('click', async () => {
-        const status = await postManager.getLatestStatus();
-        if (status) {
-            updateTweetDisplay(status.text, status.link);
-        }
-    });
+        latestSidesplitters.addEventListener('click', () => {
+            console.log('Latest Sidesplitters clicked');
+            const tweet = postManager.getRandomTweet('wisdom');
+            updateTweetDisplay(tweet);
+        });
+
+        feelingButton.addEventListener('click', async () => {
+            console.log('Feeling Button clicked');
+            const status = await postManager.getLatestStatus();
+            if (status) {
+                const tweetText = document.getElementById('tweetText');
+                const tweetLink = document.getElementById('tweetLink');
+                tweetText.textContent = status.text;
+                tweetLink.href = status.link;
+                tweetLink.style.display = 'block';
+            }
+        });
+    } else {
+        console.error('One or more buttons not found!');
+    }
 }); 

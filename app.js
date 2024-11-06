@@ -11,7 +11,8 @@ class PostManager {
 
     getRandomTweet(type) {
         const list = type === 'funny' ? funnyTweets : wisdomTweets;
-        return list[Math.floor(Math.random() * list.length)];
+        const randomTweet = list[Math.floor(Math.random() * list.length)];
+        return `Tweet: "${randomTweet.tweet}"\n\nInner Thoughts: "${randomTweet.thoughts}"`;
     }
 
     async getLatestStatus() {
@@ -21,7 +22,7 @@ class PostManager {
             if (data.data && data.data[0]) {
                 return {
                     text: data.data[0].text,
-                    url: `https://x.com/Juice_Johnson32/status/${data.data[0].id}`
+                    url: `https://x.com/TheRealOJ32/status/${data.data[0].id}`
                 };
             }
             return null;

@@ -8,7 +8,16 @@ const apiKey = process.env.TWITTER_API_KEY;
 class TweetManager {
     constructor() {
         this.apiKey = process.env.X_AI_KEY;
-        this.greatestHits = [];
+        this.greatestHits = [
+            {
+                text: "People keep asking me what I think about Will Smith and Chris Rock. I don't know Will Smith and I haven't played golf with Chris Rock. So I'm not qualified to give an opinion.",
+                id: "1508661752474963968"
+            },
+            {
+                text: "Life is good, I'm playing golf 4-5 days a week.",
+                id: "1499943558664171520"
+            }
+        ];
         this.currentTweets = [];
     }
 
@@ -79,23 +88,27 @@ class TweetManager {
 const tweetManager = new TweetManager();
 
 // Event Listeners
-document.getElementById('greatestCuts').addEventListener('click', async () => {
-    const loadingText = document.getElementById('tweetText');
-    loadingText.textContent = 'Analyzing OJ's greatest hits...';
-    
-    const tweet = await tweetManager.fetchAndAnalyzeLatestTweets();
+document.getElementById('greatestCuts').addEventListener('click', () => {
+    console.log('Greatest Cuts clicked'); // Debug log
+    const tweet = tweetManager.getRandomGreatestHit();
     displayTweet(tweet);
 });
 
 document.getElementById('latestSidesplitters').addEventListener('click', async () => {
+    console.log('Latest Sidesplitters clicked'); // Debug log
+    tweetText.textContent = 'Loading latest tweet...';
     const tweet = await tweetManager.fetchLatestTweets();
     displayTweet(tweet);
 });
 
 function displayTweet(tweet) {
-    const tweetText = document.getElementById('tweetText');
-    const tweetLink = document.getElementById('tweetLink');
-    
-    tweetText.textContent = tweet.text;
-    tweetLink.href = `https://twitter.com/${OJ_TWITTER_ID}/status/${tweet.id}`;
+    console.log('Displaying tweet:', tweet); // Debug log
+    if (tweet) {
+        tweetText.textContent = tweet.text;
+        tweetLink.href = `https://twitter.com/therealoj32/status/${tweet.id}`;
+        tweetLink.style.display = 'block'; // Show the link
+    } else {
+        tweetText.textContent = 'No tweet available';
+        tweetLink.style.display = 'none';
+    }
 } 

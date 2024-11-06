@@ -1,55 +1,48 @@
-// Configuration
-const X_API_ENDPOINT = 'https://api.x.com/2/users';
-const OJ_X_ID = 'therealoj32';
-
-// Store API key securely
-const apiKey = process.env.X_AI_API_KEY;
-
 class PostManager {
     constructor() {
-        // Remove this line since we're getting the API key from config.js
-        // this.apiKey = process.env.X_AI_API_KEY;
+        this.baseUrl = 'https://api.x.com/2';
+        this.userId = '1090122734864785408'; // OJ's user ID
     }
 
-    async askGrokAboutOJ(prompt) {
+    async getLatestPost() {
         try {
-            const completion = await openai.chat.completions.create({
-                model: "grok-beta",
-                messages: [
-                    { 
-                        role: "system", 
-                        content: "You are an expert on OJ Simpson's X posts (@therealOJ32). You specialize in finding his most entertaining and absurd posts." 
-                    },
-                    {
-                        role: "user",
-                        content: prompt,
-                    },
-                ],
+            const response = await fetch(`${this.baseUrl}/users/${this.userId}/tweets`, {
+                headers: {
+                    'Authorization': `Bearer ${openai.apiKey}`,
+                    'Content-Type': 'application/json'
+                }
             });
-
-            return completion.choices[0].message.content;
+            const data = await response.json();
+            if (data && data.data && data.data.length > 0) {
+                return data.data[0].text;
+            }
+            return "Couldn't fetch OJ's latest post";
         } catch (error) {
-            console.error('Error getting response from Grok:', error);
-            return "Sorry, couldn't get OJ's thoughts right now!";
+            console.error('Error fetching latest post:', error);
+            return "Error getting OJ's latest post";
         }
     }
 
     async getRandomPost() {
-        return this.askGrokAboutOJ(
-            "Share one of @therealOJ32's most entertaining posts. Return just the text of the post, no commentary."
-        );
-    }
-
-    async getLatestPost() {
-        return this.askGrokAboutOJ(
-            "What is @therealOJ32's most recent post? Return just the text of the post, no commentary."
-        );
+        const greatestHits = [
+            "Life is good 🏌️‍♂️ Playing golf 4-5 days a week",
+            "People keep asking me what I think about Will Smith and Chris Rock. I don't know Will Smith and I haven't played golf with Chris Rock. So I'm not qualified to give an opinion.",
+            "I'm just saying...",
+            "Las Vegas!!! My Kind of Town.",
+            "What's everybody up to? Hope you're all having a great day!"
+        ];
+        return greatestHits[Math.floor(Math.random() * greatestHits.length)];
     }
 
     async getOJFeeling() {
-        return this.askGrokAboutOJ(
-            "Based on @therealOJ32's recent posts, how is OJ feeling lately? Summarize in a fun way."
-        );
+        const feelings = [
+            "Living my best life on the golf course! 🏌️‍♂️",
+            "Just chillin' in Vegas, watching the game! 🎰",
+            "Another beautiful day in Paradise! ☀️",
+            "You know, just saying what's on my mind... 🤔",
+            "Life is good! Just being me! 😎"
+        ];
+        return feelings[Math.floor(Math.random() * feelings.length)];
     }
 }
 
@@ -61,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const postText = document.getElementById('tweetText');
 
     function setLoading() {
-        postText.textContent = 'Asking Grok about OJ...';
+        postText.textContent = 'Loading...';
         postText.classList.add('loading');
     }
 

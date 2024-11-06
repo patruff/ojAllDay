@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "build": "mkdir -p build && cp -r src/* build/",
+    "build": "cp app.js . && cp -r src .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

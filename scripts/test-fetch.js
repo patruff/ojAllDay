@@ -1,32 +1,26 @@
 const fetch = require('node-fetch');
+const fs = require('fs');
+const path = require('path');
 
 async function fetchTweets() {
     const baseUrl = 'https://api.x.ai/v1/chat/completions';
     
-    const funnyPrompt = `You are OJ Simpson's inner monologue. You know that you committed those murders, but you maintain public innocence while making subtle, darkly humorous references to it. For each of these 10 real OJ tweets, provide both the tweet and your inner thoughts about it in this format:
-
-Tweet: "[actual tweet text]"
-Inner Thoughts: "[dark humor commentary from OJ's perspective]"
-
-Make the inner thoughts subtly reference the murders while maintaining plausible deniability, like how OJ himself often does. Be clever and darkly funny, not explicit.
-
-For example:
-Tweet: "Just played 18 holes of golf today!"
-Inner Thoughts: "Golf is all about precision and choosing the right tools for the job... just like other hobbies I may or may not have experience with... 😉"
-
-Please provide 10 tweet/thought pairs in this style.`;
-
-    const recentPrompt = `You are OJ Simpson's inner monologue. You know that you committed those murders, but you maintain public innocence while making subtle, darkly humorous references to it. For each of these 30 meaningful OJ tweets, provide both the tweet and your inner thoughts about it in this format:
-
-Tweet: "[actual tweet text]"
-Inner Thoughts: "[dark humor commentary from OJ's perspective]"
-
-Make the inner thoughts subtly reference the murders while maintaining plausible deniability, like how OJ himself often does. Be clever and darkly funny, not explicit.`;
+    const funnyPrompt = `You are OJ Simpson's inner monologue. Generate 50 tweet/thought pairs. For each pair, provide a plausible tweet that OJ might have written, followed by your darkly humorous inner thoughts about it. Make the inner thoughts subtly reference the murders while maintaining plausible deniability. Format in JSON array. Example format:
+    {
+        "tweet": "Just played 18 holes of golf today!",
+        "thoughts": "Golf is all about precision and choosing the right tools for the job... just like other hobbies I may or may not have experience with... 😉"
+    }`;
+    
+    const wisdomPrompt = `You are OJ Simpson's inner monologue. Generate 50 different tweet/thought pairs about life lessons and wisdom. For each pair, provide a plausible tweet that OJ might have written, followed by your darkly humorous inner thoughts about it. Make the inner thoughts subtly reference the murders while maintaining plausible deniability. Format in JSON array. Example format:
+    {
+        "tweet": "Life teaches you to appreciate the little things.",
+        "thoughts": "Like how a simple pair of gloves can make or break your whole day... if you know what I mean 😏"
+    }`;
 
     try {
-        console.log("Fetching with API key:", process.env.X_AI_API_KEY ? "Present" : "Missing");
+        console.log("Fetching tweets...");
         
-        // Test funny tweets call
+        // Fetch funny tweets
         const funnyResponse = await fetch(baseUrl, {
             method: 'POST',
             headers: {
@@ -35,10 +29,7 @@ Make the inner thoughts subtly reference the murders while maintaining plausible
             },
             body: JSON.stringify({
                 messages: [
-                    { 
-                        role: "system", 
-                        content: "You are OJ Simpson's inner voice. You know the truth about the murders but maintain public innocence while making darkly humorous references. Be subtle and clever, not explicit." 
-                    },
+                    { role: "system", content: "You are OJ Simpson's inner voice. Be darkly humorous but maintain plausible deniability." },
                     { role: "user", content: funnyPrompt }
                 ],
                 model: "grok-beta",
@@ -47,10 +38,9 @@ Make the inner thoughts subtly reference the murders while maintaining plausible
         });
 
         const funnyData = await funnyResponse.json();
-        console.log("\nFunny Tweets Response:", JSON.stringify(funnyData, null, 2));
-
-        // Test recent tweets call
-        const recentResponse = await fetch(baseUrl, {
+        
+        // Fetch wisdom tweets
+        const wisdomResponse = await fetch(baseUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -58,22 +48,60 @@ Make the inner thoughts subtly reference the murders while maintaining plausible
             },
             body: JSON.stringify({
                 messages: [
-                    { 
-                        role: "system", 
-                        content: "You are OJ Simpson's inner voice. You know the truth about the murders but maintain public innocence while making darkly humorous references. Be subtle and clever, not explicit." 
-                    },
-                    { role: "user", content: recentPrompt }
+                    { role: "system", content: "You are OJ Simpson's inner voice. Be darkly humorous but maintain plausible deniability." },
+                    { role: "user", content: wisdomPrompt }
                 ],
                 model: "grok-beta",
                 stream: false
             })
         });
 
-        const recentData = await recentResponse.json();
-        console.log("\nRecent Tweets Response:", JSON.stringify(recentData, null, 2));
+        const wisdomData = await wisdomResponse.json();
+
+        // Parse the responses
+        const funnyContent = funnyData.choices[0].message.content;
+        const wisdomContent = wisdomData.choices[0].message.content;
+
+        // Extract JSON arrays from the content
+        const funnyTweets = JSON.parse(funnyContent.substring(
+            funnyContent.indexOf('['),
+            funnyContent.lastIndexOf(']') + 1
+        ));
+        
+        const wisdomTweets = JSON.parse(wisdomContent.substring(
+            wisdomContent.indexOf('['),
+            wisdomContent.lastIndexOf(']') + 1
+        ));
+
+        // Generate the new tweets.js content
+        const tweetsFileContent = `// Auto-generated by test-fetch.js
+export const funnyTweets = ${JSON.stringify(funnyTweets, null, 2)};
+
+export const wisdomTweets = ${JSON.stringify(wisdomTweets, null, 2)};
+`;
+
+        // Write to tweets.js
+        const tweetsPath = path.join(__dirname, '../src/data/tweets.js');
+        fs.writeFileSync(tweetsPath, tweetsFileContent);
+
+        console.log(`Successfully updated ${tweetsPath} with ${funnyTweets.length} funny tweets and ${wisdomTweets.length} wisdom tweets!`);
+
+        // Also save raw responses for reference
+        const responsesPath = path.join(__dirname, '../src/data/raw_responses.json');
+        fs.writeFileSync(responsesPath, JSON.stringify({
+            funny: funnyData,
+            wisdom: wisdomData
+        }, null, 2));
+
+        console.log(`Raw responses saved to ${responsesPath}`);
 
     } catch (error) {
-        console.error("Error fetching tweets:", error);
+        console.error("Error:", error);
+        if (error.message.includes('JSON')) {
+            console.log("Raw response content:");
+            console.log(funnyData?.choices[0]?.message?.content);
+            console.log(wisdomData?.choices[0]?.message?.content);
+        }
     }
 }
 

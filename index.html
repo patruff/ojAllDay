@@ -58,35 +58,72 @@
         </div>
     </div>
 
+    <!-- Load config first -->
+    <script src="config.js"></script>
+    
     <script>
-        const tweets = [
-            {
-                text: "Tweet 1: Life is good, I'm playing golf 4-5 days a week.",
-                id: "1499943558664171520"
-            },
-            {
-                text: "Tweet 2: People keep asking me what I think about Will Smith and Chris Rock. I don't know Will Smith and I haven't played golf with Chris Rock.",
-                id: "1508661752474963968"
-            },
-            {
-                text: "Tweet 3: I'm watching this Bills game... Not liking what I'm seeing",
-                id: "1508661752474963969"
+        const OJ_USER_ID = '1115764400'; // OJ Simpson's Twitter user ID
+
+        async function fetchLatestTweets() {
+            try {
+                console.log('Fetching tweets...');
+                document.getElementById('tweetText').textContent = 'Loading tweets...';
+                
+                const response = await fetch(`https://api.twitter.com/2/users/${OJ_USER_ID}/tweets?max_results=10`, {
+                    headers: {
+                        'Authorization': `Bearer ${TWITTER_API_KEY}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Twitter API request failed: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Fetched tweets successfully');
+                return data.data;
+            } catch (error) {
+                console.error('Error fetching tweets:', error);
+                document.getElementById('tweetText').textContent = 'Error loading tweets: ' + error.message;
+                return null;
             }
-        ];
+        }
+
+        let tweetCache = [];
+
+        async function initializeTweets() {
+            const loadedTweets = await fetchLatestTweets();
+            if (loadedTweets) {
+                tweetCache = loadedTweets;
+                document.getElementById('tweetText').textContent = 'Click a button to see a tweet!';
+                console.log('Tweets loaded:', tweetCache.length);
+            }
+        }
 
         document.getElementById('greatestCuts').onclick = function() {
             console.log('Greatest Cuts clicked');
-            const randomTweet = tweets[Math.floor(Math.random() * tweets.length)];
-            document.getElementById('tweetText').textContent = randomTweet.text;
-            document.getElementById('tweetLink').href = `https://twitter.com/therealoj32/status/${randomTweet.id}`;
+            if (tweetCache.length > 0) {
+                const randomTweet = tweetCache[Math.floor(Math.random() * tweetCache.length)];
+                document.getElementById('tweetText').textContent = randomTweet.text;
+                document.getElementById('tweetLink').href = `https://twitter.com/therealoj32/status/${randomTweet.id}`;
+            } else {
+                document.getElementById('tweetText').textContent = 'No tweets available';
+            }
         };
 
-        document.getElementById('latestSidesplitters').onclick = function() {
+        document.getElementById('latestSidesplitters').onclick = async function() {
             console.log('Latest Sidesplitters clicked');
-            const latestTweet = tweets[0];
-            document.getElementById('tweetText').textContent = latestTweet.text;
-            document.getElementById('tweetLink').href = `https://twitter.com/therealoj32/status/${latestTweet.id}`;
+            const freshTweets = await fetchLatestTweets();
+            if (freshTweets && freshTweets.length > 0) {
+                const latestTweet = freshTweets[0];
+                document.getElementById('tweetText').textContent = latestTweet.text;
+                document.getElementById('tweetLink').href = `https://twitter.com/therealoj32/status/${latestTweet.id}`;
+                tweetCache = freshTweets;
+            }
         };
+
+        // Initialize tweets when page loads
+        initializeTweets();
     </script>
 </body>
 </html> 

@@ -1,4 +1,7 @@
-import { funnyTweets, wisdomTweets } from './data/tweets.js';
+import { funnyTweets, wisdomTweets } from './src/data/tweets.js';
+
+// Initialize PostManager
+const postManager = new PostManager();
 
 class PostManager {
     constructor() {
@@ -30,25 +33,27 @@ class PostManager {
 }
 
 // Event Listeners
-document.getElementById('funnyButton').addEventListener('click', () => {
-    const tweet = postManager.getRandomTweet('funny');
-    document.getElementById('output').textContent = tweet;
-});
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('funnyButton').addEventListener('click', () => {
+        const tweet = postManager.getRandomTweet('funny');
+        document.getElementById('output').textContent = tweet;
+    });
 
-document.getElementById('wisdomButton').addEventListener('click', () => {
-    const tweet = postManager.getRandomTweet('wisdom');
-    document.getElementById('output').textContent = tweet;
-});
+    document.getElementById('wisdomButton').addEventListener('click', () => {
+        const tweet = postManager.getRandomTweet('wisdom');
+        document.getElementById('output').textContent = tweet;
+    });
 
-document.getElementById('statusButton').addEventListener('click', async () => {
-    const status = await postManager.getLatestStatus();
-    if (status) {
-        const link = document.createElement('a');
-        link.href = status.url;
-        link.textContent = status.text;
-        link.target = '_blank';
-        const output = document.getElementById('output');
-        output.innerHTML = '';
-        output.appendChild(link);
-    }
+    document.getElementById('statusButton').addEventListener('click', async () => {
+        const status = await postManager.getLatestStatus();
+        if (status) {
+            const link = document.createElement('a');
+            link.href = status.url;
+            link.textContent = status.text;
+            link.target = '_blank';
+            const output = document.getElementById('output');
+            output.innerHTML = '';
+            output.appendChild(link);
+        }
+    });
 }); 

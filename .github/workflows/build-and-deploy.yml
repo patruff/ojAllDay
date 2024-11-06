@@ -11,10 +11,13 @@ jobs:
       
       - name: Generate config
         run: |
-          echo "const TWITTER_API_KEY = '${{ secrets.TWITTER_API_KEY }}';" > config.js
+          echo "const openai = new OpenAI({
+            apiKey: '${{ secrets.TWITTER_API_KEY }}',
+            baseURL: 'https://api.x.ai/v1',
+          });" > config.js
           
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: . 
+          publish_dir: .

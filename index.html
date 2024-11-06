@@ -46,6 +46,8 @@
             text-decoration: none;
         }
     </style>
+    <!-- Import OpenAI library -->
+    <script src="https://unpkg.com/openai@4.0.0/dist/index.js"></script>
 </head>
 <body>
     <div class="container">
@@ -58,72 +60,54 @@
         </div>
     </div>
 
-    <!-- Load config first -->
-    <script src="config.js"></script>
-    
     <script>
-        const OJ_USER_ID = '1115764400'; // OJ Simpson's Twitter user ID
+        // Initialize OpenAI with Grok configuration
+        const openai = new OpenAI({
+            apiKey: 'YOUR_X_AI_KEY', // We'll get this from GitHub secrets
+            baseURL: "https://api.x.ai/v1",
+        });
 
-        async function fetchLatestTweets() {
+        const sampleTweets = [
+            "Life is good, I'm playing golf 4-5 days a week.",
+            "People keep asking me what I think about Will Smith and Chris Rock.",
+            "I'm watching this Bills game... Not liking what I'm seeing"
+        ];
+
+        async function askGrok(tweets) {
             try {
-                console.log('Fetching tweets...');
-                document.getElementById('tweetText').textContent = 'Loading tweets...';
+                document.getElementById('tweetText').textContent = 'Asking Grok...';
                 
-                const response = await fetch(`https://api.twitter.com/2/users/${OJ_USER_ID}/tweets?max_results=10`, {
-                    headers: {
-                        'Authorization': `Bearer ${TWITTER_API_KEY}`
-                    }
+                const completion = await openai.chat.completions.create({
+                    model: "grok-beta",
+                    messages: [
+                        { 
+                            role: "system", 
+                            content: "You are an expert at finding the most entertaining and absurd OJ Simpson tweets." 
+                        },
+                        {
+                            role: "user",
+                            content: `Here are some OJ Simpson tweets. Pick the most ridiculous one and explain why it's funny: ${tweets.join(', ')}`
+                        }
+                    ]
                 });
-                
-                if (!response.ok) {
-                    throw new Error(`Twitter API request failed: ${response.status}`);
-                }
 
-                const data = await response.json();
-                console.log('Fetched tweets successfully');
-                return data.data;
+                document.getElementById('tweetText').textContent = completion.choices[0].message.content;
+                document.getElementById('tweetLink').href = `https://twitter.com/therealoj32/status/${tweets[0].id}`;
             } catch (error) {
-                console.error('Error fetching tweets:', error);
-                document.getElementById('tweetText').textContent = 'Error loading tweets: ' + error.message;
-                return null;
-            }
-        }
-
-        let tweetCache = [];
-
-        async function initializeTweets() {
-            const loadedTweets = await fetchLatestTweets();
-            if (loadedTweets) {
-                tweetCache = loadedTweets;
-                document.getElementById('tweetText').textContent = 'Click a button to see a tweet!';
-                console.log('Tweets loaded:', tweetCache.length);
+                console.error('Error asking Grok:', error);
+                document.getElementById('tweetText').textContent = 'Error asking Grok: ' + error.message;
             }
         }
 
         document.getElementById('greatestCuts').onclick = function() {
             console.log('Greatest Cuts clicked');
-            if (tweetCache.length > 0) {
-                const randomTweet = tweetCache[Math.floor(Math.random() * tweetCache.length)];
-                document.getElementById('tweetText').textContent = randomTweet.text;
-                document.getElementById('tweetLink').href = `https://twitter.com/therealoj32/status/${randomTweet.id}`;
-            } else {
-                document.getElementById('tweetText').textContent = 'No tweets available';
-            }
+            askGrok(sampleTweets);
         };
 
-        document.getElementById('latestSidesplitters').onclick = async function() {
+        document.getElementById('latestSidesplitters').onclick = function() {
             console.log('Latest Sidesplitters clicked');
-            const freshTweets = await fetchLatestTweets();
-            if (freshTweets && freshTweets.length > 0) {
-                const latestTweet = freshTweets[0];
-                document.getElementById('tweetText').textContent = latestTweet.text;
-                document.getElementById('tweetLink').href = `https://twitter.com/therealoj32/status/${latestTweet.id}`;
-                tweetCache = freshTweets;
-            }
+            askGrok(sampleTweets);
         };
-
-        // Initialize tweets when page loads
-        initializeTweets();
     </script>
 </body>
 </html> 

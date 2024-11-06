@@ -59,12 +59,17 @@ document.addEventListener('DOMContentLoaded', () => {
             updateTweetDisplay(tweet);
         });
 
-        feelingButton.addEventListener('click', async () => {
+        feelingButton.addEventListener('click', () => {
             console.log('Feeling Button clicked');
-            const status = await postManager.getLatestStatus();
-            if (status) {
-                const tweetText = document.getElementById('tweetText');
-                tweetText.textContent = status;
+            try {
+                document.getElementById('tweetText').textContent = 'Checking on OJ...';
+                const statusUrl = 'https://x.com/TheRealOJ32/status/1778430029350707380';
+                document.getElementById('tweetText').textContent = 'Check out OJ\'s last tweet ever...';
+                document.getElementById('tweetLink').href = statusUrl;
+                document.getElementById('tweetLink').style.display = 'block';
+            } catch (error) {
+                console.error('Error getting OJ\'s status:', error);
+                document.getElementById('tweetText').textContent = 'Error checking on OJ!';
             }
         });
     } else {

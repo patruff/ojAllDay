@@ -1,18 +1,19 @@
 import { funnyTweets, wisdomTweets } from './src/data/tweets.js';
 
-// Initialize PostManager
-const postManager = new PostManager();
-
 class PostManager {
     constructor() {
         this.baseUrl = 'https://api.x.com/2';
-        this.userId = '1090122734864785408'; // OJ's user ID
+        this.userId = '1090122734864785408';
     }
 
     getRandomTweet(type) {
         const list = type === 'funny' ? funnyTweets : wisdomTweets;
         const randomTweet = list[Math.floor(Math.random() * list.length)];
-        return `Tweet: "${randomTweet.tweet}"\n\nInner Thoughts: "${randomTweet.thoughts}"`;
+        const formattedText = `Tweet: "${randomTweet.tweet}"\n\nInner Thoughts: "${randomTweet.thoughts}"`;
+        return {
+            text: formattedText,
+            link: '#'  // No link for pre-populated tweets
+        };
     }
 
     async getLatestStatus() {
@@ -22,7 +23,7 @@ class PostManager {
             if (data.data && data.data[0]) {
                 return {
                     text: data.data[0].text,
-                    url: `https://x.com/TheRealOJ32/status/${data.data[0].id}`
+                    link: `https://x.com/TheRealOJ32/status/${data.data[0].id}`
                 };
             }
             return null;
@@ -33,28 +34,32 @@ class PostManager {
     }
 }
 
+// Initialize PostManager
+const postManager = new PostManager();
+
+function updateTweetDisplay(text, link) {
+    document.getElementById('tweetText').textContent = text;
+    const tweetLink = document.getElementById('tweetLink');
+    tweetLink.href = link;
+    tweetLink.style.display = link === '#' ? 'none' : 'block';
+}
+
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('funnyButton').addEventListener('click', () => {
+    document.getElementById('greatestCuts').addEventListener('click', () => {
         const tweet = postManager.getRandomTweet('funny');
-        document.getElementById('output').textContent = tweet;
+        updateTweetDisplay(tweet.text, tweet.link);
     });
 
-    document.getElementById('wisdomButton').addEventListener('click', () => {
+    document.getElementById('latestSidesplitters').addEventListener('click', () => {
         const tweet = postManager.getRandomTweet('wisdom');
-        document.getElementById('output').textContent = tweet;
+        updateTweetDisplay(tweet.text, tweet.link);
     });
 
-    document.getElementById('statusButton').addEventListener('click', async () => {
+    document.getElementById('feelingButton').addEventListener('click', async () => {
         const status = await postManager.getLatestStatus();
         if (status) {
-            const link = document.createElement('a');
-            link.href = status.url;
-            link.textContent = status.text;
-            link.target = '_blank';
-            const output = document.getElementById('output');
-            output.innerHTML = '';
-            output.appendChild(link);
+            updateTweetDisplay(status.text, status.link);
         }
     });
 }); 
